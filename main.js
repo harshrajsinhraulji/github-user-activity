@@ -1,57 +1,11 @@
-const stories = {
-  "2026-08-11": {
-    category: "Launch",
-    title: "Daily News Calendar begins",
-    summary: "The calendar is ready for its first researched daily headline. Each new entry will preserve a concise neutral summary and a direct link to the original reporting.",
-    source: "https://www.reuters.com/world/"
-  }
-};
-
-const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const calendar = document.querySelector("#calendar");
-const monthLabel = document.querySelector("#month-title");
-const monthSubtitle = document.querySelector("#month-subtitle");
-const storyPanel = document.querySelector("#selected-story");
-let selectedDate = Object.keys(stories).sort().at(-1);
-let viewDate = new Date(selectedDate + "T12:00:00");
-
-const keyFor = (year, month, day) => `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-
-function renderStory(key) {
-  const story = stories[key];
-  if (!story) return;
-  selectedDate = key;
-  storyPanel.innerHTML = `
-    <p class="eyebrow">${story.category}</p>
-    <h2>${story.title}</h2>
-    <p>${story.summary}</p>
-    <p class="story-meta">${new Intl.DateTimeFormat("en", { dateStyle: "full" }).format(new Date(key + "T12:00:00"))}</p>
-    <a href="${story.source}" target="_blank" rel="noopener">Read the source <span aria-hidden="true">↗</span></a>`;
-  document.querySelectorAll(".day.featured").forEach(day => day.classList.toggle("is-selected", day.dataset.date === key));
-}
-
-function renderCalendar() {
-  const year = viewDate.getFullYear();
-  const month = viewDate.getMonth();
-  monthLabel.textContent = new Intl.DateTimeFormat("en", { month: "long", year: "numeric" }).format(viewDate);
-  const count = new Date(year, month + 1, 0).getDate();
-  const first = new Date(year, month, 1).getDay();
-  const entries = Object.keys(stories).filter(key => key.startsWith(`${year}-${String(month + 1).padStart(2, "0")}`));
-  monthSubtitle.textContent = `${entries.length} story${entries.length === 1 ? "" : "ies"} archived`;
-  calendar.innerHTML = days.map(day => `<div class="weekday">${day}</div>`).join("");
-  for (let index = 0; index < first; index += 1) calendar.insertAdjacentHTML("beforeend", '<div class="day blank"></div>');
-  for (let day = 1; day <= count; day += 1) {
-    const key = keyFor(year, month, day);
-    const story = stories[key];
-    const article = story
-      ? `<button class="day featured ${key === selectedDate ? "is-selected" : ""}" data-date="${key}" aria-label="Read story for ${key}"><span class="number">${day}</span><span class="headline">${story.title}</span><span class="tag">${story.category}</span></button>`
-      : `<div class="day"><span class="number">${day}</span></div>`;
-    calendar.insertAdjacentHTML("beforeend", article);
-  }
-  calendar.querySelectorAll(".featured").forEach(button => button.addEventListener("click", () => renderStory(button.dataset.date)));
-}
-
-document.querySelector("#previous-month").addEventListener("click", () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1); renderCalendar(); });
-document.querySelector("#next-month").addEventListener("click", () => { viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1); renderCalendar(); });
-renderCalendar();
-renderStory(selectedDate);
+const stories={"2026-08-11":{category:"Launch",title:"Daily News Calendar begins",summary:"The calendar is ready for one sourced headline per day. Community events can be submitted and voted on below.",source:"https://www.worldbrief.info/trending?month=2026-08"}};
+const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],calendar=document.querySelector("#calendar"),monthLabel=document.querySelector("#month-title"),subtitle=document.querySelector("#month-subtitle"),storyPanel=document.querySelector("#selected-story");let selectedDate=Object.keys(stories).sort().at(-1),viewDate=new Date(selectedDate+"T12:00:00");
+const keyFor=(y,m,d)=>`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+function showStory(key){const s=stories[key];if(!s)return;selectedDate=key;storyPanel.innerHTML=`<p class="eyebrow">${s.category}</p><h2>${s.title}</h2><p>${s.summary}</p><p class="story-meta">${new Intl.DateTimeFormat("en",{dateStyle:"full"}).format(new Date(key+"T12:00:00"))}</p><a href="${s.source}" target="_blank" rel="noopener">Read the source ↗</a>`;document.querySelectorAll(".day.featured").forEach(x=>x.classList.toggle("is-selected",x.dataset.date===key))}
+function renderCalendar(){const y=viewDate.getFullYear(),m=viewDate.getMonth(),count=new Date(y,m+1,0).getDate(),first=new Date(y,m,1).getDay(),entries=Object.keys(stories).filter(k=>k.startsWith(`${y}-${String(m+1).padStart(2,"0")}`));monthLabel.textContent=new Intl.DateTimeFormat("en",{month:"long",year:"numeric"}).format(viewDate);subtitle.textContent=`${entries.length} sourced stor${entries.length===1?"y":"ies"}`;calendar.innerHTML=days.map(d=>`<div class="weekday">${d}</div>`).join("");for(let n=0;n<first;n++)calendar.insertAdjacentHTML("beforeend",'<div class="day blank"></div>');for(let d=1;d<=count;d++){const k=keyFor(y,m,d),s=stories[k];calendar.insertAdjacentHTML("beforeend",s?`<button class="day featured ${k===selectedDate?"is-selected":""}" data-date="${k}"><span class="number">${d}</span><span class="headline">${s.title}</span><span class="tag">${s.category}</span></button>`:`<div class="day"><span class="number">${d}</span></div>`)}calendar.querySelectorAll(".featured").forEach(b=>b.onclick=()=>showStory(b.dataset.date))}
+document.querySelector("#previous-month").onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1,1);renderCalendar()};document.querySelector("#next-month").onclick=()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()+1,1);renderCalendar()};renderCalendar();showStory(selectedDate);
+const list=document.querySelector("#community-events"),status=document.querySelector("#form-status");
+function renderEvents(events){list.innerHTML=events.length?events.map(e=>`<article class="event"><div><span>${e.date}</span><h3>${e.link?`<a href="${e.link}" target="_blank" rel="noopener">${e.title}</a>`:e.title}</h3></div><button data-vote="${e.id}">▲ ${e.votes||0}</button></article>`).join(""):"<p class='empty'>No community events yet — add the first one.</p>";list.querySelectorAll("[data-vote]").forEach(b=>b.onclick=()=>post({action:"vote",id:b.dataset.vote}))}
+async function post(body){const r=await fetch("/api/events",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)}),data=await r.json();if(!r.ok)throw Error(data.error||"Could not save");renderEvents(data)}
+async function loadEvents(){try{const r=await fetch("/api/events");renderEvents(await r.json())}catch{list.innerHTML="<p class='empty'>Community events become available after Vercel KV is connected.</p>"}}
+document.querySelector("#event-form").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget);status.textContent="Saving…";try{await post({action:"add",title:f.get("title"),date:f.get("date"),link:f.get("link")});e.currentTarget.reset();status.textContent="Added to community picks."}catch(err){status.textContent=err.message}};loadEvents();
